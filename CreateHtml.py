@@ -9,23 +9,22 @@ import subprocess
 import platform
 import shutil
 
-
-strCurrentTime = sys.argv[1]
-sFailedCase = sys.argv[2]
-strFailedCase = sFailedCase.split(",")
-reportHTMLfile = "log/report_midletTest_"+strCurrentTime+"/Report_"+strCurrentTime+".html"
-createHTMLFile = open(reportHTMLfile,"w+")
-comConfig = ConfigParser.ConfigParser()
-comConfig.read("conf/config.ini")
-ProjectName = comConfig.get("COM_CONFIG","ProjectName")
+ISOTIMEFORMAT='%Y-%m-%d_%H_%M_%S'
+CurrentTime = time.strftime(ISOTIMEFORMAT, time.localtime())
+createHTMLFile = open(r'Report_{0}.html'.format(CurrentTime),'w+')
 caseConfig = ConfigParser.ConfigParser()
-caseConfig.read("conf/midletCaseList_{0}.ini".format(ProjectName))
+caseConfig.read("CaseList.ini")
 #FailedCase = ConfigParser.ConfigParser()
 #FailedCase.read("log/report_midletTest_"+strCurrentTime+"/midletFailedCase.txt")
 #f1 = open("log/report_midletTest_"+strCurrentTime+"/midletFailedCase.txt","r")
 #strFailedCase = FailedCase.sections()
 #strFailedCase = f1.readlines()
 userCaseList = caseConfig.sections()
+
+failcase = ConfigParser.ConfigParser()
+failcase.read("failList.ini")
+strFailedCase = failcase.sections()
+
 np=0
 nf=0
 ne=0
@@ -36,7 +35,7 @@ blackColor = 'lightgreen'
 #Start to create HTML page
 from pyh import *
 page = PyH('Test_Report')
-page<<div(style="text-align:center")<<h1('Test_Report')<<h4('StartTime: '+strCurrentTime)
+page<<div(style="text-align:center")<<h1('Test_Report')<<h4('StartTime: '+CurrentTime)
 mytab = page << table(border="2",cellpadding="5",cellspacing="2",width="1600",style="align:left")
 tr1 = mytab << tr(bgcolor="lightgrey")
 tr1 << th('name') + th('Pass') + th('Fail') + th('Error') + th('ATLog') + th('TraceLog')
@@ -65,4 +64,5 @@ for thisCase in userCaseList:
 np = np-nf   
 tr2 = mytab << tr(bgcolor="lightgrey")
 tr2 <<td('Total')+td(np)+td(nf)+td(ne)+td(' ')+td(' ')
-page.printOut(reportHTMLfile)
+page.printOut('Report_{0}.html'.format(CurrentTime))
+createHTMLFile.close()
